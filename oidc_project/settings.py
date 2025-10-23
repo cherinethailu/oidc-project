@@ -76,21 +76,22 @@ TEMPLATES = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-
+    "http://localhost:3000",  # or your actual frontend domain
 ]
 
 WSGI_APPLICATION = 'oidc_project.wsgi.application'
 
 
+CORS_ALLOW_ALL_ORIGINS = True
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 
 # Password validation
