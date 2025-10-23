@@ -17,7 +17,7 @@ from jose import JWTError
 from jwcrypto import jwk, jwe
 from jwcrypto.jwe import InvalidJWEData, JWE
 from dotenv import load_dotenv
-
+from django.http import JsonResponse
 load_dotenv()
 
 CLIENT_ID = os.environ.get('CLIENT_ID')
@@ -128,13 +128,15 @@ def home(request):
     generate_pkce()  # Generate PKCE before creating the auth URL
     claims = {
         "userinfo": {
-            "given_name": {"essential": True},
-            "Phone": {"essential": True},
+            "name": {"essential": True},
+            "phone_number": {"essential": True},
             "email": {"essential": True},
             "picture": {"essential": True},
             "gender": {"essential": True},
             "birthdate": {"essential": True},
-            "address": {"essential": True}
+            "address": {"essential": True},
+            "nationality": {"essential": True},
+            "individual_id": {"essential": True}
         },
         "id_token": {}
     }
@@ -142,16 +144,151 @@ def home(request):
     encoded_claims = urllib.parse.quote(json.dumps(claims))
     auth_url = (
         f"{AUTHORIZATION_ENDPOINT}?"
+        f"claims_locales=en&"
         f"response_type=code&"
         f"client_id={CLIENT_ID}&"
         f"redirect_uri={REDIRECT_URI}&"
         f"scope=openid profile email&"
-        f"acr_values=mosip:idp:acr:password&"
-        f"code_challenge={CODE_CHALLENGE}&"
+        f"acr_values=mosip:idp:acr:generated-code:biometrics&"
+        f"code_challenge=Qa34J02L95JjcCWyyBFDvRgFWAgtwzQQavBWBBEs0_8&"
         f"code_challenge_method=S256&"
         f"claims={encoded_claims}"
     )
     return render(request, 'oidc_app/home.html', {'auth_url': auth_url})
+
+
+def login_user(request):
+    """Handle username/password login with Fayda verification requirement"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        # Simple validation (in real app, you'd validate against database)
+        if username and email and password:
+            # Store basic user info in session (not verified)
+            request.session['user_name'] = username
+            request.session['user_email'] = email
+            request.session['user_phone'] = '+251 91 123 4567'
+            request.session['user_gender'] = 'Not Specified'
+            request.session['user_birthdate'] = 'Not Specified'
+            request.session['user_nationality'] = 'Not Specified'
+            request.session['user_address'] = 'Not Specified'
+            request.session['user_picture'] = ''
+            request.session['user_sub'] = f'demo_{username}'
+            request.session['fayda_verified'] = False
+            
+            return redirect('unverified_dashboard')
+        else:
+            return render(request, 'oidc_app/home.html', {
+                'error': 'Please fill in all fields',
+                'auth_url': request.session.get('auth_url', '')
+            })
+    
+    return redirect('home')
+
+
+def unverified_dashboard(request):
+    """Dashboard for users who haven't verified with Fayda"""
+    # Generate the same auth URL as the home page
+    global CODE_VERIFIER, CODE_CHALLENGE
+    generate_pkce()  # Generate PKCE before creating the auth URL
+    claims = {
+        "userinfo": {
+            "name": {"essential": True},
+            "phone_number": {"essential": True},
+            "email": {"essential": True},
+            "picture": {"essential": True},
+            "gender": {"essential": True},
+            "birthdate": {"essential": True},
+            "address": {"essential": True},
+            "nationality": {"essential": True},
+            "individual_id": {"essential": True}
+        },
+        "id_token": {}
+    }
+
+    encoded_claims = urllib.parse.quote(json.dumps(claims))
+    auth_url = (
+        f"{AUTHORIZATION_ENDPOINT}?"
+        f"claims_locales=en&"
+        f"response_type=code&"
+        f"client_id={CLIENT_ID}&"
+        f"redirect_uri={REDIRECT_URI}&"
+        f"scope=openid profile email&"
+        f"acr_values=mosip:idp:acr:generated-code:biometrics&"
+        f"code_challenge=Qa34J02L95JjcCWyyBFDvRgFWAgtwzQQavBWBBEs0_8&"
+        f"code_challenge_method=S256&"
+        f"claims={encoded_claims}"
+    )
+    
+    context = {
+        'user_name': request.session.get('user_name', 'User'),
+        'auth_url': auth_url
+    }
+    return render(request, 'oidc_app/unverified_dashboard.html', context)
+
+
+def dashboard(request):
+    """Main banking dashboard"""
+    # In a real application, you would get user data from session or database
+    # For demo purposes, we'll use sample data
+    context = {
+        'name': request.session.get('user_name', 'John Doe'),
+        'email': request.session.get('user_email', 'john.doe@example.com'),
+    }
+    return render(request, 'oidc_app/dashboard.html', context)
+
+
+def profile(request):
+    """User profile management page"""
+    # In a real application, you would get user data from session or database
+    context = {
+        'name': request.session.get('user_name', 'John Doe'),
+        'email': request.session.get('user_email', 'john.doe@example.com'),
+        'phone': request.session.get('user_phone', '+251 91 123 4567'),
+        'gender': request.session.get('user_gender', 'Male'),
+        'birthdate': request.session.get('user_birthdate', '1990-01-01'),
+        'residence_status': request.session.get('user_nationality', 'Ethiopian'),
+        'address': request.session.get('user_address', 'Addis Ababa, Ethiopia'),
+    }
+    return render(request, 'oidc_app/profile.html', context)
+
+
+def account_verification(request):
+    """Account verification status page"""
+    return render(request, 'oidc_app/account_verification.html')
+
+
+def loan_eligibility(request):
+    """Loan eligibility checker page"""
+    return render(request, 'oidc_app/loan_eligibility.html')
+
+
+def account_balance(request):
+    """Account balance page"""
+    return render(request, 'oidc_app/account_balance.html')
+
+
+def transactions(request):
+    """Recent transactions page"""
+    return render(request, 'oidc_app/transactions.html')
+
+
+def exchange_rates(request):
+    """Exchange rates page"""
+    return render(request, 'oidc_app/exchange_rates.html')
+
+
+def logout(request):
+    """Logout user and clear session"""
+    request.session.flush()
+    return redirect('home')
+
+
+def coming_soon(request):
+    """Coming soon page for features under development"""
+    return render(request, 'oidc_app/coming_soon.html')
 
 
 @csrf_exempt
@@ -171,8 +308,10 @@ def callback(request):
             'client_id': CLIENT_ID,
             'client_assertion_type': CLIENT_ASSERTION_TYPE,
             'client_assertion': signed_jwt,
-            'code_verifier': CODE_VERIFIER,
+            'code_verifier': "mr1FJpYpOyV.YBXg3dAWee18berTlOxgqDlaReTyJjmOMsYGdiTgohtBkvck0I.JQyVDe4U_16o2zm2JQKaScIvMTj3zn59i2e0~lGGOHeS0tK1RAuTq40Z01jPW2BKc",
         }
+
+        logging.info(f"Payload: {payload}")
 
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         try:
@@ -181,6 +320,7 @@ def callback(request):
             if response.status_code == 200:
                 token_data = response.json()
                 access_token = token_data.get('access_token')
+                logging.info(f"access token {access_token}")
                 userinfo_url = USERINFO_ENDPOINT
                 userinfo_headers = {'Authorization': f'Bearer {access_token}'}
                 userinfo_response = requests.get(userinfo_url, headers=userinfo_headers)
@@ -194,18 +334,28 @@ def callback(request):
                         email = decoded_user_info.get('email', 'N/A')
                         sub = decoded_user_info.get('sub', 'N/A')
                         picture = decoded_user_info.get('picture', '')
-                        phone = decoded_user_info.get('phone', '')
+                        phone = decoded_user_info.get('phone_number', '')
                         birthdate = decoded_user_info.get('birthdate', '')
-                        residence_status = decoded_user_info.get('residenceStatus', '')
+                        residence_status = decoded_user_info.get('nationality', '')
                         gender = decoded_user_info.get('gender', ''),
                         address = decoded_user_info.get('address', '')
                         logging.info("------------------------------")
-                        logging.info(user_info_response)
+                        # logging.info(user_info_response)
                         logging.info("###############################")
                         logging.info(decoded_user_info)
                         logging.info("###############################")
 
-
+                        # Store user data in session for dashboard access
+                        request.session['user_name'] = name
+                        request.session['user_email'] = email
+                        request.session['user_phone'] = phone
+                        request.session['user_gender'] = gender
+                        request.session['user_birthdate'] = birthdate
+                        request.session['user_nationality'] = residence_status
+                        request.session['user_address'] = address
+                        request.session['user_picture'] = picture
+                        request.session['user_sub'] = sub
+                        request.session['fayda_verified'] = True
 
                         # Pass the user info to the template for rendering
                         context = {
@@ -225,9 +375,45 @@ def callback(request):
 
                     except Exception as e:
                         return JsonResponse({"error": f"Failed to decode JWT: {str(e)}"}, status=500)
+                else:
+                    logging.error(f"Userinfo request failed with status: {userinfo_response.status_code}")
+                    return JsonResponse({"error": "Failed to retrieve user information"}, status=500)
             else:
                 logging.info(f"Error occurred with status code: {response.status_code} and response is: {response.content}")
+                return JsonResponse({"error": f"Token exchange failed: {response.status_code}"}, status=500)
 
         except Exception as e:
             logging.error(f"Exception occurred -- {e}")
+            return JsonResponse({"error": f"Callback processing failed: {str(e)}"}, status=500)
+    
+    return JsonResponse({"error": "Method not allowed"}, status=405)
 
+
+@csrf_exempt
+def userinfo(request):
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+            access_token = body.get('access_token')
+            logging.info(f"access_token {access_token}")
+
+            userinfo_url = USERINFO_ENDPOINT
+            userinfo_headers = {'Authorization': f'Bearer {access_token}'}
+            userinfo_response = requests.get(userinfo_url, headers=userinfo_headers)
+
+            logging.info("Userinfo")
+            logging.info(userinfo_response.text)
+
+            decoded_user_info = jwt.decode(
+                userinfo_response.text,
+                options={"verify_signature": False},
+                algorithms=["RS256"]
+            )
+
+            logging.info(decoded_user_info)
+            return JsonResponse(decoded_user_info)
+        except Exception as e:
+            logging.error(f"Error in /userinfo/: {e}", exc_info=True)
+            return JsonResponse({"error": "Internal Server Error"}, status=500)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)

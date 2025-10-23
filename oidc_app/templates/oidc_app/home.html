@@ -3,101 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fayda Relying Party</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
+    <title>Capital Bank - Secure Banking Portal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #1a1a2e; /* Dark blue background */
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            box-sizing: border-box;
         }
 
-        .container {
-            background-color: #162447;
-            border-radius: 12px;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
+            text-align: center;
+        }
+
+        .bank-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
         }
 
         h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .form-group {
             margin-bottom: 20px;
-            color: #f8c94e; /* Dark yellow */
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #f8c94e;
-            background-color: #0f3460;
-            color: white;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
         }
 
-        input::placeholder {
-            color: #d1d1d1;
+        input:focus {
+            outline: none;
+            border-color: #1e3c72;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
         }
 
         .btn {
-            background-color: #f8c94e;
-            color: #1a1a2e;
-            padding: 12px;
             width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
             border: none;
-            border-radius: 8px;
-            margin-top: 20px;
-            cursor: pointer;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
         }
 
         .btn:hover {
-            background-color: #e3b63b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 60, 114, 0.3);
         }
 
-        .esignet-link {
-            color: #f8c94e;
-            text-decoration: none;
-            font-size: 14px;
-            margin-top: 15px;
-            display: inline-block;
+        .divider {
+            margin: 20px 0;
+            position: relative;
+            text-align: center;
+            color: #666;
         }
 
-        .esignet-link:hover {
-            color: #e3b63b;
-        }
-
-        footer {
+        .divider::before {
+            content: '';
             position: absolute;
-            bottom: 10px;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e5e9;
+        }
+
+        .divider span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 20px;
+        }
+
+        .fayda-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
             color: white;
-            font-size: 12px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .fayda-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .security-badge {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            color: #2d5a2d;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .features {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .feature i {
+            display: block;
+            font-size: 1.5rem;
+            color: #1e3c72;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Fayda Mock Relying Party Portal</h1>
-        <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn">Sign In</button>
+    <div class="login-container">
+        <div class="bank-logo">
+            <i class="fas fa-university"></i>
+        </div>
+        <h1>Capital Bank</h1>
+        <p class="subtitle">Your Trusted Financial Partner</p>
+        
+        <form action="/login/" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
         </form>
-        <p>or</p>
-        <a href="{{ auth_url }}" class="esignet-link">Sign in with Fayda E-Signet</a>
-    </div>
 
-    <footer>
-        &copy; 2024 National ID. All Rights Reserved.
-    </footer>
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <a href="{{ auth_url }}" class="fayda-btn">
+            <i class="fas fa-id-card"></i>
+            Sign in with Fayda
+        </a>
+
+        <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            Bank-level security with 256-bit encryption
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-mobile-alt"></i>
+                Mobile Banking
+            </div>
+            <div class="feature">
+                <i class="fas fa-credit-card"></i>
+                Digital Cards
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-line"></i>
+                Investment
+            </div>
+            <div class="feature">
+                <i class="fas fa-handshake"></i>
+                Loans
+            </div>
+        </div>
+    </div>
 </body>
 </html>
