@@ -236,6 +236,7 @@ def dashboard(request):
     context = {
         'name': request.session.get('user_name', 'John Doe'),
         'email': request.session.get('user_email', 'john.doe@example.com'),
+        'user_picture': request.session.get('user_picture', ''),
     }
     return render(request, 'oidc_app/dashboard.html', context)
 
@@ -251,6 +252,7 @@ def profile(request):
         'birthdate': request.session.get('user_birthdate', '1990-01-01'),
         'residence_status': request.session.get('user_nationality', 'Ethiopian'),
         'address': request.session.get('user_address', 'Addis Ababa, Ethiopia'),
+        'user_picture': request.session.get('user_picture', ''),
     }
     return render(request, 'oidc_app/profile.html', context)
 
